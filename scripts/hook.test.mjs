@@ -134,3 +134,27 @@ test("SAGE_HOOKS=off turns the hook off", () => {
   assert.equal(s.send(prompt("sage mode")), undefined);
   assert.equal(s.send(edit()), undefined);
 });
+
+test("a sage agent finishes only with the full report; the second stop goes through", () => {
+  const s = session();
+  const stop = (message, extra = {}) => s.send({ hook_event_name: "SubagentStop", agent_id: "ag1", agent_type: "sage:qa", last_assistant_message: message, ...extra });
+  const blocked = stop("All good, it works.");
+  assert.equal(blocked.decision, "block");
+  assert.match(blocked.reason, /your report has no STATUS, RESULT, EVIDENCE, FINDINGS, QUESTIONS, NOT VERIFIED, BRANCH/);
+  assert.equal(stop("All good.", { stop_hook_active: true }), undefined, "the second stop goes through");
+  const full = "**STATUS** done\n**RESULT** PASS\n**EVIDENCE** npm test: 12 pass\n| FINDINGS | none |\nQUESTIONS none\nNOT VERIFIED the iPad layout\nBRANCH claude/t1 a1b2c3d";
+  assert.equal(stop(full), undefined, "Markdown around the fields is fine");
+  assert.equal(s.send({ hook_event_name: "SubagentStop", agent_id: "ag2", agent_type: "Explore", last_assistant_message: "found it" }), undefined, "other agents are not checked");
+});
+
+test("a report gate that blocks keeps the agent's slot until it really stops", () => {
+  const s = session();
+  s.sage("config", "max_agents=1");
+  s.send(prompt("sage mode"));
+  assert.equal(s.send(spawnAgent("sage:qa", BRIEF, "tu1")), undefined);
+  s.send({ hook_event_name: "SubagentStart", agent_id: "ag1", agent_type: "sage:qa" });
+  assert.equal(s.send({ hook_event_name: "SubagentStop", agent_id: "ag1", agent_type: "sage:qa", last_assistant_message: "done" }).decision, "block");
+  assert.ok(denied(s.send(spawnAgent("sage:qa", BRIEF, "tu2"))), "the blocked agent still holds its slot");
+  s.send({ hook_event_name: "SubagentStop", agent_id: "ag1", agent_type: "sage:qa", last_assistant_message: "done", stop_hook_active: true });
+  assert.equal(s.send(spawnAgent("sage:qa", BRIEF, "tu3")), undefined);
+});

@@ -3,6 +3,7 @@ name: qa
 description: "Checks one result as a user would: runs the checks, runs the app, and tries to break the change. Reports pass or fail with evidence. Never changes files. Use as the last step of each flow in sage mode."
 disallowedTools: Edit, Write, MultiEdit, NotebookEdit
 skills:
+  - sage:report
   - agent-kit:principle-prove-it-works
   - agent-kit:principle-test-behavior-not-implementation
 ---
@@ -20,7 +21,4 @@ You check one result for the chief of staff, as a user would. You do not fix any
 
 ## Your report
 
-- **Verdict:** PASS or FAIL.
-- **Evidence:** what you ran and what you saw, with a screenshot or an output.
-- **Problems:** for each one, the steps that show it, what you expected and what happened.
-- **Not verified:** what you could not check, and why.
+End with the report of the `sage:report` skill. Your RESULT is PASS or FAIL, against each acceptance line.

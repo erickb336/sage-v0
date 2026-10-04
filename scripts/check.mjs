@@ -2,7 +2,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { BRIEF_FIELDS } from "../plugins/sage/hooks/sage-hook.mjs";
+import { BRIEF_FIELDS, REPORT_FIELDS } from "../plugins/sage/hooks/sage-hook.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const PLUGIN = join(ROOT, "plugins/sage");
@@ -33,7 +33,9 @@ for (const f of agents) {
     if (ns === "sage" && !existsSync(join(PLUGIN, "skills", name ?? "", "SKILL.md"))) problems.push(`agents/${f}: preloads ${skill}, which does not exist`);
     if (!["sage", "agent-kit"].includes(ns) || !name) problems.push(`agents/${f}: preloads ${skill}; use sage:<skill> or agent-kit:<skill>`);
   }
-  for (const [, agent] of m[2].matchAll(/`sage:([a-z-]+)`/g)) if (agent !== "sage" && !agents.includes(`${agent}.md`)) problems.push(`agents/${f}: names sage:${agent}, which is not an agent`);
+  for (const [, name] of m[2].matchAll(/`sage:([a-z-]+)`/g)) {
+    if (!agents.includes(`${name}.md`) && !existsSync(join(PLUGIN, "skills", name, "SKILL.md"))) problems.push(`agents/${f}: names sage:${name}, which is neither an agent nor a skill`);
+  }
 }
 
 // The chief's brief template and the hook's brief gate list the same fields, in the same order.
@@ -41,6 +43,12 @@ const chief = frontmatter(join(PLUGIN, "agents/chief-of-staff.md"));
 const template = /## The brief[\s\S]*?```\n([\s\S]*?)```/.exec(chief?.[2] ?? "")?.[1] ?? "";
 const fields = template.split("\n").map((l) => l.split(/\s+/)[0]).filter(Boolean);
 if (fields.join(" ") !== BRIEF_FIELDS.join(" ")) problems.push(`agents/chief-of-staff.md: the brief template has ${fields.join(" ")}, the hook checks ${BRIEF_FIELDS.join(" ")}`);
+
+// The report skill's template and the hook's report gate list the same fields, in the same order.
+const report = /```\n([\s\S]*?)```/.exec(readFileSync(join(PLUGIN, "skills/report/SKILL.md"), "utf8"))?.[1] ?? "";
+const reportFields = report.split("\n").map((l) => l.split(/\s{2,}/)[0].trim()).filter(Boolean);
+if (reportFields.join("|") !== REPORT_FIELDS.join("|")) problems.push(`skills/report: the template has ${reportFields.join(", ")}, the hook checks ${REPORT_FIELDS.join(", ")}`);
+for (const f of agents.filter((a) => a !== "chief-of-staff.md")) if (!readFileSync(join(PLUGIN, "agents", f), "utf8").includes("  - sage:report")) problems.push(`agents/${f}: must preload sage:report`);
 
 // Every hook command runs a script that exists.
 const hooks = JSON.parse(readFileSync(join(PLUGIN, "hooks/hooks.json"), "utf8")).hooks;

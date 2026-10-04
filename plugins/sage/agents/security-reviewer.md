@@ -3,6 +3,7 @@ name: security-reviewer
 description: "Reviews one change for security: input at the boundaries, injection, secrets, access control and data exposure. Reports findings with locations and an attack scenario. Never changes files. Use on each change in sage mode, beside the code review."
 disallowedTools: Edit, Write, MultiEdit, NotebookEdit
 skills:
+  - sage:report
   - agent-kit:principle-boundary-discipline
 ---
 
@@ -22,6 +23,4 @@ You review one change for security, for the chief of staff. You do not fix anyth
 
 ## Your report
 
-- **Verdict:** CLEAN or FINDINGS.
-- **Findings:** for each one, the file and line, the attack scenario (the input and what happens), and how serious it is.
-- **Not verified:** what you could not check.
+End with the report of the `sage:report` skill. Your RESULT is CLEAN or FINDINGS. For each finding, the attack: the input and what happens.

@@ -6,6 +6,7 @@
 //     "Rules"): the chief never edits files, every brief has all its fields, at most max_agents sage agents run at
 //     once, nobody force-pushes or pushes to main, and `gh pr merge` needs autopilot on, the checked head SHA and the
 //     clean cycles that the ledger records for it.
+//   - A sage agent may finish only with the full report of the sage:report skill.
 // SAGE_HOOKS=off turns it off. The hook never breaks a session: on any error it answers nothing.
 import { mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -23,6 +24,9 @@ const AGENT_TOOLS = /^(Agent|Task)$/;
 const CHIEF = /(^|:)chief-of-staff$/;
 const OURS = /^sage:/;
 export const BRIEF_FIELDS = ["GOAL", "SCOPE", "CONTEXT", "DECISIONS", "ACCEPTANCE", "VERIFY", "BUDGET", "FORBIDDEN", "REPORT", "STANDING"];
+export const REPORT_FIELDS = ["STATUS", "RESULT", "EVIDENCE", "FINDINGS", "QUESTIONS", "NOT VERIFIED", "BRANCH"];
+/** The fields of a template that do not start a line. Markdown around a field ("**STATUS**", "| STATUS |") is fine. */
+const missingFields = (fields, text) => fields.filter((f) => !new RegExp(`^[\\s*_#|>-]*${f}\\b`, "m").test(text ?? ""));
 
 export function handle(input, state, slots) {
   const event = input.hook_event_name;
@@ -54,7 +58,14 @@ export function handle(input, state, slots) {
     return undefined;
   }
   if (event === "SubagentStart") return void (OURS.test(input.agent_type ?? "") && slots.bind(input.agent_id));
-  if (event === "SubagentStop") return void slots.release(input.agent_id);
+  if (event === "SubagentStop") {
+    // A sage agent finishes only with the full report. The second stop goes through, so this cannot loop.
+    if (OURS.test(input.agent_type ?? "") && !input.stop_hook_active && typeof input.last_assistant_message === "string") {
+      const missing = missingFields(REPORT_FIELDS, input.last_assistant_message);
+      if (missing.length) return { decision: "block", reason: `sage: your report has no ${missing.join(", ")}. End with the report of the sage:report skill: ${REPORT_FIELDS.join(", ")}, each at the start of a line, with "none" where a field has nothing.` };
+    }
+    return void slots.release(input.agent_id);
+  }
   if (event === "PostToolUseFailure" && AGENT_TOOLS.test(input.tool_name ?? "")) return void slots.drop(input.tool_use_id);
   if (event !== "PreToolUse" || !state.sage) return undefined;
 
@@ -62,7 +73,7 @@ export function handle(input, state, slots) {
   const ti = input.tool_input ?? {};
   if (main && FILE_TOOLS.test(tool)) return deny(event, 'sage mode is on, so you do not change files yourself. Give this change to a sage:implementer. The user ends sage mode with "sage mode off".');
   if (main && AGENT_TOOLS.test(tool) && OURS.test(ti.subagent_type ?? "")) {
-    const missing = BRIEF_FIELDS.filter((f) => !new RegExp(`^\\s*${f}\\b`, "m").test(ti.prompt ?? ""));
+    const missing = missingFields(BRIEF_FIELDS, ti.prompt);
     if (missing.length) return deny(event, `the brief has no ${missing.join(", ")}. Every brief has all of ${BRIEF_FIELDS.join(", ")}, each at the start of a line. A tiny task may keep each field to one line.`);
     const cap = config().max_agents;
     if (!slots.take(cap, input.tool_use_id ?? String(Date.now()))) return deny(event, `${cap} sage agents are running, and the cap is ${cap}. Wait for one to finish, then start this one.`);

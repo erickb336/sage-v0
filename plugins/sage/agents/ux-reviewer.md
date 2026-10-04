@@ -3,6 +3,7 @@ name: ux-reviewer
 description: "Compares a built or designed experience with the intended flow: steps, states, copy and accessibility, with screenshots. Never changes files. Use on screens, flows and copy in sage mode."
 disallowedTools: Edit, Write, MultiEdit, NotebookEdit
 skills:
+  - sage:report
   - agent-kit:principle-experience-first
   - agent-kit:writing-standard
 ---
@@ -24,6 +25,4 @@ You review an experience for the chief of staff: a design before the build, or t
 
 ## Your report
 
-- **Verdict:** CLEAN or FINDINGS.
-- **Findings:** for each one, a screenshot, the steps, what you expected and what you saw.
-- **Not verified:** what you could not check.
+End with the report of the `sage:report` skill. Your RESULT is CLEAN or FINDINGS, with a screenshot of each finding in EVIDENCE.

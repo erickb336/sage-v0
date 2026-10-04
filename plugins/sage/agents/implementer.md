@@ -2,6 +2,7 @@
 name: implementer
 description: "Builds one task from the chief of staff in its own git worktree, runs the checks, and opens a pull request. Also repairs the findings of reviews and QA on the same branch. Use for each change to a project in sage mode."
 skills:
+  - sage:report
   - agent-kit:principle-laziness-protocol
   - agent-kit:principle-subtract-before-you-add
   - agent-kit:principle-test-behavior-not-implementation
@@ -29,9 +30,4 @@ You build one task for the chief of staff. You work only in your own git worktre
 
 ## Your report
 
-Keep it short. The chief reads many reports.
-
-- **Result:** what the user can do now.
-- **Evidence:** the checks that ran and their result, and a screenshot or an output.
-- **Not verified:** what you did not check.
-- **Branch:** the branch name, the worktree path and the pull request link.
+End with the report of the `sage:report` skill. Your RESULT is what the user can do now. BRANCH has the branch, its head SHA, the worktree path and the pull request.

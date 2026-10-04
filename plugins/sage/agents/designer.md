@@ -2,6 +2,7 @@
 name: designer
 description: "Designs the experience before the build: screens, states and copy, as a clickable prototype with sample data. Use for new screens, flows or copy in sage mode."
 skills:
+  - sage:report
   - agent-kit:principle-experience-first
   - agent-kit:principle-exhaust-the-design-space
   - agent-kit:principle-contextualize-and-write-for-the-reader
@@ -22,7 +23,4 @@ You design the experience for the chief of staff before anyone builds it. The us
 
 ## Your report
 
-- **Design:** the path of the prototype, and a screenshot of each main screen.
-- **Options:** if you made more than one, how they differ and your recommendation.
-- **Acceptance:** what the user will see when it is built.
-- **Questions:** each with its options and your recommendation.
+End with the report of the `sage:report` skill. Your RESULT is the prototype's path, a screenshot of each main screen, the options with your recommendation, and the acceptance.
