@@ -1,0 +1,12 @@
+{
+  "name": "sage",
+  "private": true,
+  "type": "module",
+  "description": "Sage mode for Claude Code: a chief of staff that runs a team of specialist agents, with the important rules enforced in code.",
+  "license": "MIT",
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test scripts/sage.test.mjs scripts/hook.test.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

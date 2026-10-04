@@ -1,0 +1,11 @@
+{
+  "name": "sage",
+  "version": "0.1.0",
+  "description": "Sage mode: a chief of staff that runs specialist agents (PE, designer, implementer, code, security and UX reviewers, QA), with the important rules enforced in code.",
+  "author": { "name": "Erick Benitez-Ramos" },
+  "homepage": "https://github.com/erickb336/sage",
+  "repository": "https://github.com/erickb336/sage",
+  "license": "MIT",
+  "keywords": ["orchestration", "agents", "chief of staff", "sage mode"],
+  "dependencies": ["agent-kit@agent-kit"]
+}

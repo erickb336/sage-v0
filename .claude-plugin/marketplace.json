@@ -1,0 +1,13 @@
+{
+  "name": "sage",
+  "description": "Sage mode for Claude Code: a chief of staff that runs a team of specialist agents.",
+  "owner": { "name": "Erick Benitez-Ramos" },
+  "allowCrossMarketplaceDependenciesOn": ["agent-kit"],
+  "plugins": [
+    {
+      "name": "sage",
+      "source": "./plugins/sage",
+      "description": "Say \"sage mode\" and the session becomes your chief of staff: it routes each task through specialist agents, keeps a ledger of verdicts by head SHA, and merges only what passed."
+    }
+  ]
+}
